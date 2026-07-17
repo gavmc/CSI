@@ -15,24 +15,24 @@ Since there's no way to hand-label CSI with joint coordinates, the system uses *
 ## Architecture
 
 ```
-┌─────────────┐   50 Hz CSI (UDP)   ┌───────────────┐
+┌─────────────┐   50 Hz CSI (UDP)   ┌────────────────┐
 │  4x ESP32   │ ──────────────────► │   Collector    │
 │  receivers  │                     │ (clock sync,   │
 └─────────────┘                     │  csi.npz)      │
        ▲                            └───────┬────────┘
        │ probe traffic                      │
 ┌─────────────┐                             ▼
-│ Netgear X6  │                    ┌────────────────┐      ┌──────────────────┐
-│  (AP / Tx)  │                    │ Dataset builder │◄─────│ YOLO-pose teacher │
-└─────────────┘                    │ resample/window │      │ (13 keypoints/fr) │
-                                    │   /normalize    │      └──────────────────┘
-                                    └───────┬─────────┘
-                                            ▼
-                                  ┌───────────────────┐
-                                  │  CSIPoseTransformer │
-                                  │  X [N,4,50,52] →    │
-                                  │  Y [N,13,2]          │
-                                  └───────────────────┘
+│ Netgear X6  │                    ┌─────────────────┐      ┌──────────────────┐
+│  (AP / Tx)  │                    │ Dataset builder │◄─────│ YOLO-pose teacher│
+└─────────────┘                    │ resample/window │      │ (13 keypoints/fr)│
+                                   │   /normalize    │      └──────────────────┘
+                                   └───────┬─────────┘
+                                           ▼
+                                 ┌────────────────────┐
+                                 │  CSIPoseTransformer│
+                                 │  X [N,4,50,52] →   │
+                                 │  Y [N,13,2]        │
+                                 └────────────────────┘
 ```
 
 ## Hardware
