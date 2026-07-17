@@ -1,0 +1,2 @@
+source D:/python/CSI/v2/csi-rx/build/bootloader/gdbinit/symbols
+source D:/python/CSI/v2/csi-rx/build/bootloader/gdbinit/connect
