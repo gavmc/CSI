@@ -1,0 +1,9 @@
+Command: cmake -G Ninja -B D:\python\CSI\v2\csi-rx-v2\build -DPYTHON_DEPS_CHECKED=1 -DPYTHON=C:\Users\Gavin\.espressif\python_env\idf6.0_py3.14_env\Scripts\python.exe -DESP_PLATFORM=1 -DIDF_TARGET=esp32 -DCCACHE_ENABLE=True D:\python\CSI\v2\csi-rx-v2
+Configuration Report               
++---------------------------------+
+|  Parser Version: 1              |
+|  Verbosity: default             |
+|  Defaults policy: sdkconfig     |
+|  Status: Finished successfully  |
+|                                 |
++---------------------------------+
