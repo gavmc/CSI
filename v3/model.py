@@ -87,7 +87,7 @@ class DETR(nn.Module):
         x = self.freq_norm(x) #         [B*T*R, K, D]
         x = x.reshape(B, T, R, K, D)  # [B, T, R, K, D]
 
-        x += self.time_embedding[:, :T] + self.rx_embedding[:, :, :R] + self.freq_embedding[:, :, :, :K]
+        x += self.time_embedding + self.rx_embedding + self.freq_embedding
         x = x.permute(0, 1, 3, 2, 4)  # [B, T, K, R, D]
 
         x = x.reshape(B*T*K, R, D) #    [B*T*K, R, D]
