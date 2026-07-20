@@ -1,9 +1,0 @@
-{
-  "configurations": [
-    {
-      "name": "ESP-IDF",
-      "compileCommands": "${workspaceFolder}/build/compile_commands.json"
-    }
-  ],
-  "version": 4
-}
