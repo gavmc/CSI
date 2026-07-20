@@ -1,64 +1,78 @@
+from dataset import CSIDataset
+from model import SimpleLoss, DETR
+
 import torch
-from torch.optim import AdamW
-from torch.utils.data import TensorDataset, DataLoader
-import h5py
+from torch.utils.data import DataLoader, ConcatDataset
 
-from model import CSI_DETR, Simple_Loss
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-
-EPOCHS = 20
-BATCH_SIZE = 24
-WINDOW_LEN = 50
+SESSIONS = 5
+EPOCHS = 3
 
 
+def get_loader():
+    datasets = [CSIDataset(f"session_{session_num:03d}.h5") for session_num in range(SESSIONS)]
+    dataset = ConcatDataset(datasets)
 
-def load_data(path):
+    loader = DataLoader(
+        dataset,
+        batch_size=32,
+        shuffle=True,
+        num_workers=4,
+        pin_memory=True
+    )
 
-    with h5py.File(path, "r") as f:
-
-        raw_csi = torch.from_numpy(f["CSI"][...]).float()
-        pos_data = torch.from_numpy(f["POS"][...]).float()[WINDOW_LEN-1:]
-
-        csi_data = raw_csi.unfold(dimension=0, size=WINDOW_LEN, step=1).permute(0, 3, 1, 2)
-
-        print(csi_data.shape)
-        print(pos_data.shape)
-
-        dataset = TensorDataset(csi_data, pos_data)
-
-        return DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+    return loader
 
 
-def train(model, loss_fn, optimizer, data_loader, epochs):
 
+def train(model, loss_fn, optimizer):
     model.train()
+    loader = get_loader()
 
-    for epoch in range(epochs):
-        running_loss = 0
+    for epoch in range(EPOCHS):
+        running_loss = 0.0
 
-        for x, y in data_loader:
+        for csi, target in loader:
+            csi = csi.to(device, non_blocking=True)
+            target = target.to(device, non_blocking=True)
 
-            optimizer.zero_grad()
+            optimizer.zero_grad(set_to_none=True)
 
-            out = model(x)
-            loss = loss_fn(out, y)
+            pred = model(csi)
+            loss = loss_fn(pred, target)
 
             loss.backward()
             optimizer.step()
 
             running_loss += loss.item()
 
-        print(f"Epoch {epoch} | Loss {running_loss / len(data_loader)}")
+        running_loss /= len(loader)
+        print(
+            f"Epoch: {epoch} | "
+            f"Loss: {running_loss:.4f}"
+        )
 
-
-
+        
 if __name__ == "__main__":
-    model = CSI_DETR()
-    loss_fn = Simple_Loss(5, 1)
-    optimizer = AdamW(model.parameters(), lr=1e-3)
 
-    data_loader = load_data("./csi_data.h5")
-    train(model, loss_fn, optimizer, data_loader, EPOCHS)
+    model = DETR().to(device)
 
-    torch.save(model.state_dict(), "csi_detr.pth")
+    loss_fn = SimpleLoss(
+        pos_weight=1,
+        conf_weight=1
+    )
+
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr = 1e-4,
+        weight_decay=1e-4
+    )
+
+    train(
+        model=model,
+        loss_fn=loss_fn,
+        optimizer=optimizer
+    )
+
+    torch.save(model.state_dict(), "DETR_weights.pth")

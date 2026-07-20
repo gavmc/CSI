@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class CSI_DETR(nn.Module):
+class DETR(nn.Module):
     def __init__(
             self, 
             n_reciv: int = 4, 
@@ -146,28 +146,6 @@ class SimpleLoss(nn.Module):
         return self.pos_weight * pos_loss + self.conf_weight * conf_loss
 
 
-if __name__ == "__main__":
-
-    model = CSI_DETR()
-    loss = SimpleLoss()
-
-    t = torch.rand(1, 50, 4, 52)
-
-    gt = torch.rand(1, 13, 3)
-
-    out = model(t)
-    l = loss(out, gt)
-
-    params = 0
-
-    for p in model.parameters():
-        params += p.numel()
-
-    print("Model params", params)
-    print()
-    print(out)
-    print()
-    print(l)
 
 
 
